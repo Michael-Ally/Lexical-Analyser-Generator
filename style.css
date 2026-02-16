@@ -1,0 +1,207 @@
+
+:root{
+    --bg: #ffffff; 
+    --panel: rgba(15,23,42,0.6);
+    --muted: #94a3b8;
+    --accent: #000000;
+    --surface: #0b1220;
+    --border: #373839;
+    --text: #000000;
+}
+
+body, html { height: 100%;
+     margin: 0;
+}
+
+.app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+.topbar{
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+}
+.brand{ display:flex;
+     align-items:center;
+      gap:0.5rem 
+}
+.brand-dot{ 
+    width:10px;
+    height:10px; 
+    border-radius:50%; 
+    background:var(--accent) 
+}
+.brand-title{ 
+    font-weight:700; 
+    font-size:1.05rem 
+}
+.brand-version{ color:var(--muted); 
+    font-weight:500; 
+    margin-left:6px 
+}
+.actions{ 
+    display:flex; 
+    gap:0.6rem 
+}
+
+.layout{ 
+    display:flex; 
+    flex:1; 
+    overflow:hidden 
+}
+
+.sidebar{ 
+    width:320px; 
+    border-right:1px 
+    solid var(--border); 
+    background:rgb(252, 252, 252); 
+    padding:1rem;
+    display:flex;
+    flex-direction:column;
+    gap:1rem 
+}
+.panel{ 
+    display:flex; 
+    flex-direction:column; 
+    flex:1;  
+}
+
+.main{ 
+    flex:1; 
+    display:flex; 
+    flex-direction:column; 
+    min-width:0 
+}
+
+.cy-container{ 
+    flex:1; 
+    background:var(--bg); 
+}
+
+.results-panel{ 
+    height:34%; 
+    border-top:1px solid var(--border);    
+    background:rgba(253, 254, 255, 0.3);
+    overflow-y:auto
+}
+.results-table{ 
+    width:100%;
+    border-collapse:collapse }
+
+.results-table thead{ 
+    position:sticky; 
+    top:0; 
+    background:var(--surface); 
+    color:var(--muted); 
+    font-size:12px; 
+    text-transform:uppercase; 
+    letter-spacing:0.08em 
+}
+.results-table th, .results-table td{ 
+    padding:12px; 
+    border-bottom:1px solid var(--border); 
+    text-align:left 
+}
+.result-row:hover{ 
+    background: rgba(255,255,255,0.02) 
+}
+.lexeme{ 
+    color: #ffffff; 
+    font-weight:700 
+}
+.token{ 
+    color: #cbd5e1 
+}
+.line{ 
+    color: #94a3b8 
+}
+
+
+.btn-primary {
+    background-color: #2563eb; 
+    color: #ffffff;
+    padding: 0.375rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+.btn-primary:hover { background-color: #3b82f6 }
+.btn-primary:active { transform: scale(0.98) }
+
+.btn-secondary {
+    background-color: #334155; 
+    color: #ffffff;
+    padding: 0.375rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+.btn-secondary:hover { background-color: #475569 }
+.btn-secondary:active { transform: scale(0.98) }
+
+.label {
+    font-size: 11px;
+    font-weight: 700;
+    color: black;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.code-input {
+    background-color: transparent;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+    color: #ffffff;
+    outline: none;
+    resize: none;
+    min-height: 140px;
+}
+.code-input:focus { box-shadow: 0 0 0 2px rgba(247, 248, 250, 0.12); }
+
+
+::-webkit-scrollbar { 
+    width: 8px; 
+}
+::-webkit-scrollbar-track { 
+    background: transparent; 
+}
+::-webkit-scrollbar-thumb { 
+    background: #334155; 
+    border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { 
+    background: #fbfbfc; 
+}
+
+#cy { 
+    width:100%; 
+    height:100%; 
+    display:block 
+}
+
+.font-mono{ 
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace 
+}
+.small-text{ 
+    font-size:0.9rem 
+}
