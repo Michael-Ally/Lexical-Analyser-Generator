@@ -389,20 +389,19 @@
         return;
     }
 
-    // show the toolbar now that we have models
+
     toolbar.style.display = "flex";
 
-    // fill the dropdown with one option per token rule
+
     select.innerHTML = models.map(function (model) {
         return "<option value=\"" + escapeHtml(model.definition.name) + "\">" +
                escapeHtml(model.definition.name) + "</option>";
     }).join("");
 
-    // remove any previous listener by replacing the element clone
+
     const freshSelect = select.cloneNode(true);
     select.parentNode.replaceChild(freshSelect, select);
-
-    // wire the change event
+t
     freshSelect.addEventListener("change", function () {
         const chosen = models.find(function (m) {
             return m.definition.name === freshSelect.value;
@@ -414,7 +413,7 @@
         }
     });
 
-        // auto-select and render the first model
+  
         if (models.length > 0) {
             latestModel = models[0];
             renderOverview(models[0]);
@@ -820,17 +819,16 @@
         try {
             const definitions = parseDefinitions(regexInput.value);
 
-            // build models for ALL definitions, not just the first
             const allModels = buildAllModels(definitions);
 
             if (allModels.length === 0) {
                 throw new Error("No visualizable regular definition was found in the input.");
             }
 
-            // populate the token rule dropdown and render the first model
+   
             populateTokenRuleSelector(allModels);
 
-            // keep existing hidden stage options wired to whichever model is active
+        
             renderHiddenStageOptions(latestModel);
 
             global.latestGeneratedDFA = latestModel;
