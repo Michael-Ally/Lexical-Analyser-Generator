@@ -1,0 +1,140 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.auth-box {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+h2 {
+    margin: 0 0 24px;
+    color: #0f172a;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #dbe3ef;
+    margin: 15px 0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    position: relative;
+    background: #f8fafc;
+}
+
+.input-group input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 8px;
+    background: transparent;
+    font-size: 14px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    position: relative;
+    flex: 0 0 20px;
+}
+
+.user-icon::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border: 2px solid #555;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 4px;
+}
+
+.user-icon::after {
+    content: "";
+    width: 14px;
+    height: 8px;
+    border: 2px solid #555;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    position: absolute;
+    bottom: 0;
+    left: 2px;
+}
+
+.lock-icon::before {
+    content: "";
+    width: 12px;
+    height: 8px;
+    border: 2px solid #555;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    position: absolute;
+    top: 0;
+    left: 3px;
+}
+
+.lock-icon::after {
+    content: "";
+    width: 14px;
+    height: 10px;
+    border: 2px solid #555;
+    position: absolute;
+    bottom: 0;
+    left: 2px;
+}
+
+.toggle {
+    border: none;
+    background: none;
+    color: #3b82f6;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 6px;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: #4f7cff;
+    color: white;
+    border: none;
+    margin-top: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.switch {
+    margin-top: 15px;
+    color: #475569;
+    font-size: 14px;
+}
+
+.switch a {
+    color: #4f7cff;
+    text-decoration: none;
+    font-weight: 600;
+}

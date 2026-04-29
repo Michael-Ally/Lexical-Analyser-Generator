@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lexical-analyzer-project-2.0</title>
+    <link rel="stylesheet" href="newdash.css">
+</head>
+<body data-auth-page="dashboard">
+    <nav>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 id="dashboardTitle">New Dashboard</h2>
+            <div>
+                <button class="red" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="left-panel">
+            <h3>Source Code</h3>
+
+            <!-- Language presets -->
+            <div style="margin-bottom:8px;">
+                <small style="font-weight:600; color:#64748b;">Language Presets:</small>
+                <div class="lang-presets" style="margin-top:4px;">
+    
+                    <button class="lang-preset-btn c"    onclick="loadLangPreset('c')">C</button>
+                    <button class="lang-preset-btn cpp"  onclick="loadLangPreset('cpp')">C++</button>
+                    <button class="lang-preset-btn java" onclick="loadLangPreset('java')">Java</button>
+                </div>
+            </div>
+
+            <!-- Detection banner -->
+            <div id="langBanner"></div>
+
+            <div class="input-options">
+                <label><input type="radio" name="inputType" value="type" checked> Type</label>
+                <label><input type="radio" name="inputType" value="paste"> Paste</label>
+                <label><input type="radio" name="inputType" value="file"> Upload</label>
+            </div>
+            <textarea id="codeArea" placeholder="Type or paste your source code here..."></textarea>
+            <input type="file" id="fileInput" accept=".txt,.c,.cpp" hidden>
+
+
+            <div class="actions-bar" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                <button id="clearInput" style="padding:6px 14px; font-size:12px;">Clear</button>
+            
+            </div>
+
+            <div class="box" style="margin-top:12px;">
+                <h4 style="margin:0 0 6px 0;">Regular Definitions </h4>
+                <textarea id="Regular Expression" placeholder="e.g.
+KEYWORD = if|else|while|for
+IDENTIFIER = [A-Za-z_][A-Za-z0-9_]*"></textarea>
+            </div>
+        </div>
+
+        <div class="center-panel">
+            <div class="top-buttons">
+                <button id="generateBtn" class="blue">Tokenize</button>
+
+            </div>
+
+            <div class="automaton">
+                <h3>Lex Automaton (DFA)</h3>
+                <div class="dfa-toolbar">
+                    <span style="font-size:12px; color:#64748b;">Simplified  DFA overview</span>
+                </div>
+                <div class="dfa-toolbar" id="tokenRuleToolbar" style="display:none;">
+                    <label for="tokenRuleSelect" style="font-size:12px; color:#64748b;">Viewing DFA for:</label>
+                    <select id="tokenRuleSelect" style="margin-left:8px;">
+                        <option value="">-- select a token rule --</option>
+                    </select>
+                </div>
+                <details class="dfa-details" id="hiddenStagePanel">
+                    <summary>Hidden Stage Explorer</summary>
+                    <div class="dfa-details-body">
+                        <label for="dfaStageSelect" style="font-size:12px; color:#64748b;">Select a stage to expand:</label>
+                        <select id="dfaStageSelect" style="margin-left:8px;">
+                            <option value="">Tokenize code to load stage options</option>
+                        </select>
+                        <div id="hiddenStates"><p style="color:#94a3b8; font-size:13px; padding:12px;">Choose a stage to inspect the intermediate automaton flow.</p></div>
+                    </div>
+                </details>
+                <div class="states" id="states"><p style="color:#94a3b8; font-size:13px;">Tokenize code to see the simplified language DFA overview.</p></div>
+            </div>
+
+            <div class="table-box">
+                <h3>Token Table</h3>
+                <table id="tokenTable">
+                    <tr><th>LEXEME</th><th>TOKEN</th><th>LINE</th></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="top-buttons">
+                <button id="reportBtn" class="green">Diagnostics</button>
+            </div>
+
+            <h3>Diagnostics Report</h3>
+            <div id="reportPanel" class="report-card">
+                <div class="report-grid">
+                    <div class="report-metric">
+                        <strong id="reportTokenCount">0</strong>
+                        <span>Tokens</span>
+                    </div>
+                    <div class="report-metric">
+                        <strong id="reportErrorCount">0</strong>
+                        <span>Lexical Errors</span>
+                    </div>
+                   
+                </div>
+                <h4 style="margin:0 0 8px 0;">Overview</h4>
+                <ul id="reportSummary" class="report-list">
+                    <li>Run tokenization to generate an overview.</li>
+                </ul>
+            
+                <h4 style="margin:14px 0 8px 0;">Lexer Issues</h4>
+                <ul id="reportIssues" class="report-list">
+                    <li>No lexer issues detected yet.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+<script src="cLexer.js"></script>
+<script src="c++Lexer.js"></script>
+<script src="javalexer.js"></script>
+<script src="login-signup.js"></script>
+<script src="lexerUtils.js"></script>
+<script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+<script src="nfa.js"></script>
+<script src="dfa.js"></script>
+</body>
+</html>
