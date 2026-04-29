@@ -389,19 +389,20 @@
         return;
     }
 
-
+    // show the toolbar now that we have models
     toolbar.style.display = "flex";
 
-
+    // fill the dropdown with one option per token rule
     select.innerHTML = models.map(function (model) {
         return "<option value=\"" + escapeHtml(model.definition.name) + "\">" +
                escapeHtml(model.definition.name) + "</option>";
     }).join("");
 
-
+    // remove any previous listener by replacing the element clone
     const freshSelect = select.cloneNode(true);
     select.parentNode.replaceChild(freshSelect, select);
-t
+
+    // wire the change event
     freshSelect.addEventListener("change", function () {
         const chosen = models.find(function (m) {
             return m.definition.name === freshSelect.value;
@@ -413,7 +414,7 @@ t
         }
     });
 
-  
+        // auto-select and render the first model
         if (models.length > 0) {
             latestModel = models[0];
             renderOverview(models[0]);
@@ -809,6 +810,165 @@ t
             .replace(/>/g, "&gt;");
     }
 
+    function decodeEscapedSymbol(symbol) {
+        const escapes = {
+            "\\t": "\t",
+            "\\r": "\r",
+            "\\n": "\n",
+            "\\s": " ",
+            "\\\\": "\\"
+        };
+
+        return escapes[symbol] || (symbol.length === 2 && symbol[0] === "\\" ? symbol[1] : symbol);
+    }
+
+    function symbolMatchesChar(symbol, char) {
+        if (symbol === char || decodeEscapedSymbol(symbol) === char) {
+            return true;
+        }
+
+        if (symbol === ".") {
+            return char !== "\n";
+        }
+
+        if (symbol.length < 2 || symbol[0] !== "[" || symbol[symbol.length - 1] !== "]") {
+            return false;
+        }
+
+        let i = 1;
+        let isNegated = false;
+        let matched = false;
+
+        if (symbol[i] === "^") {
+            isNegated = true;
+            i++;
+        }
+
+        while (i < symbol.length - 1) {
+            let current = symbol[i];
+
+            if (current === "\\") {
+                current = decodeEscapedSymbol(symbol.slice(i, i + 2));
+                i += 2;
+            } else {
+                i++;
+            }
+
+            if (symbol[i] === "-" && i + 1 < symbol.length - 1) {
+                i++;
+                let rangeEnd = symbol[i];
+
+                if (rangeEnd === "\\") {
+                    rangeEnd = decodeEscapedSymbol(symbol.slice(i, i + 2));
+                    i += 2;
+                } else {
+                    i++;
+                }
+
+                if (char >= current && char <= rangeEnd) {
+                    matched = true;
+                }
+            } else if (char === current) {
+                matched = true;
+            }
+        }
+
+        return isNegated ? !matched : matched;
+    }
+
+    function getNextDfaState(current, char) {
+        if (current.transitions[char] !== undefined) {
+            return current.transitions[char];
+        }
+
+        const symbols = Object.keys(current.transitions);
+
+        for (let i = 0; i < symbols.length; i++) {
+            const symbol = symbols[i];
+
+            if (symbolMatchesChar(symbol, char)) {
+                return current.transitions[symbol];
+            }
+        }
+
+        return undefined;
+    }
+
+    function runDFA(dfaStates, input) {
+        if (!dfaStates || dfaStates.length === 0) return null;
+
+        const stateMap = {};
+        dfaStates.forEach(function (s) { stateMap[s.id] = s; });
+
+        let current = dfaStates[0];
+        let lastAcceptPos = -1;
+        let j = 0;
+
+        while (j < input.length) {
+            const ch = input[j];
+            const nextId = getNextDfaState(current, ch);
+            if (nextId === undefined) break;
+            current = stateMap[nextId];
+            j++;
+            if (current.isAccept) lastAcceptPos = j;
+        }
+
+        if (lastAcceptPos === -1) return null;
+        return input.slice(0, lastAcceptPos);
+    }
+
+    function tokenizeWithDFA(code, models) {
+        const tokens = [];
+        let i = 0;
+        let line = 1;
+
+        const skipTypes = ['WHITESPACE', 'COMMENT'];
+
+        while (i < code.length) {
+            if (code[i] === '\n') { line++; i++; continue; }
+            if (/[ \t\r]/.test(code[i])) { i++; continue; }
+
+            let bestMatch = null;
+            let bestLen = 0;
+            let bestType = null;
+
+            for (let m = 0; m < models.length; m++) {
+                const model = models[m];
+                const typeName = model.definition.name.trim().toUpperCase();
+
+                const matched = runDFA(model.dfaStates, code.slice(i));
+                if (!matched || matched.length <= bestLen) continue;
+
+                if (typeName === 'KEYWORD') {
+                    const nextChar = code[i + matched.length];
+                    if (nextChar && /[a-zA-Z0-9_]/.test(nextChar)) continue;
+                }
+
+                bestLen = matched.length;
+                bestMatch = matched;
+                bestType = model.definition.name;
+            }
+
+            if (!bestMatch) {
+                tokens.push({ type: 'unknown', value: code[i], line: line });
+                i++;
+            } else {
+                if (!skipTypes.includes(bestType.trim().toUpperCase())) {
+                    tokens.push({ type: bestType, value: bestMatch, line: line });
+                }
+
+                const newlines = bestMatch.match(/\n/g);
+                if (newlines) {
+                    line += newlines.length;
+                }
+
+                i += bestLen;
+            }
+        }
+
+        return tokens;
+    }
+
     function visualizeRegexDFA() {
         const regexInput = document.getElementById("Regular Expression");
 
@@ -819,16 +979,18 @@ t
         try {
             const definitions = parseDefinitions(regexInput.value);
 
+            // build models for ALL definitions, not just the first
             const allModels = buildAllModels(definitions);
+            window.allDFAModels = allModels;
 
             if (allModels.length === 0) {
                 throw new Error("No visualizable regular definition was found in the input.");
             }
 
-   
+            // populate the token rule dropdown and render the first model
             populateTokenRuleSelector(allModels);
 
-        
+            // keep existing hidden stage options wired to whichever model is active
             renderHiddenStageOptions(latestModel);
 
             global.latestGeneratedDFA = latestModel;
@@ -857,7 +1019,9 @@ t
         stateSetKey: stateSetKey,
         createDfaState: createDfaState,
         createStartDfaState: createStartDfaState,
-        getSymbols: getSymbols
+        getSymbols: getSymbols,
+        runDFA: runDFA,
+        tokenizeWithDFA: tokenizeWithDFA
     };
 
     global.visualizeRegexDFA = visualizeRegexDFA;

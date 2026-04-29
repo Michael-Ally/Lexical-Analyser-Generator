@@ -2,50 +2,122 @@
     const STORED_USER_KEY = "compiler_user";
     const LEGACY_USER_KEY = "user";
     const SESSION_USER_KEY = "compiler_session_user";
+    const USER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
     function $(id) {
         return document.getElementById(id);
     }
 
-    function getStoredUser() {
-        const primaryValue = localStorage.getItem(STORED_USER_KEY);
-        if (primaryValue) {
-            return JSON.parse(primaryValue);
+    function safeLocalGet(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function safeLocalSet(key, value) {
+        try {
+            localStorage.setItem(key, value);
+        } catch (error) {
+            // localStorage can be unavailable in strict privacy modes.
+        }
+    }
+
+    function safeLocalRemove(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (error) {
+            // localStorage can be unavailable in strict privacy modes.
+        }
+    }
+
+    function getCookieValue(name) {
+        const prefix = name + "=";
+        const parts = document.cookie ? document.cookie.split(";") : [];
+
+        for (let i = 0; i < parts.length; i++) {
+            const cookie = parts[i].trim();
+
+            if (cookie.indexOf(prefix) === 0) {
+                return decodeURIComponent(cookie.slice(prefix.length));
+            }
         }
 
-        const legacyValue = localStorage.getItem(LEGACY_USER_KEY);
-        if (!legacyValue) {
+        return null;
+    }
+
+    function setCookieValue(name, value) {
+        document.cookie = name + "=" + encodeURIComponent(value) +
+            "; max-age=" + USER_COOKIE_MAX_AGE +
+            "; path=/; SameSite=Lax";
+    }
+
+    function deleteCookieValue(name) {
+        document.cookie = name + "=; max-age=0; path=/; SameSite=Lax";
+    }
+
+    function parseUser(value) {
+        if (!value) {
             return null;
         }
 
-        const legacyUser = JSON.parse(legacyValue);
+        try {
+            const user = JSON.parse(value);
 
-        if (legacyUser && legacyUser.username && legacyUser.password) {
-            setStoredUser({
-                username: String(legacyUser.username).trim(),
-                password: String(legacyUser.password)
-            });
-            return getStoredUser();
+            if (user && user.username && user.password) {
+                return {
+                    username: String(user.username).trim(),
+                    password: String(user.password)
+                };
+            }
+        } catch (error) {
+            return null;
+        }
+
+        return null;
+    }
+
+    function getStoredUser() {
+        const primaryUser = parseUser(safeLocalGet(STORED_USER_KEY));
+        if (primaryUser) {
+            return primaryUser;
+        }
+
+        const cookieUser = parseUser(getCookieValue(STORED_USER_KEY));
+        if (cookieUser) {
+            setStoredUser(cookieUser);
+            return cookieUser;
+        }
+
+        const legacyUser = parseUser(safeLocalGet(LEGACY_USER_KEY));
+        if (legacyUser) {
+            setStoredUser(legacyUser);
+            return legacyUser;
         }
 
         return null;
     }
 
     function setStoredUser(user) {
-        localStorage.setItem(STORED_USER_KEY, JSON.stringify(user));
-        localStorage.setItem(LEGACY_USER_KEY, JSON.stringify(user));
+        const value = JSON.stringify(user);
+        safeLocalSet(STORED_USER_KEY, value);
+        safeLocalSet(LEGACY_USER_KEY, value);
+        setCookieValue(STORED_USER_KEY, value);
     }
 
     function setSessionUser(username) {
-        localStorage.setItem(SESSION_USER_KEY, username);
+        safeLocalSet(SESSION_USER_KEY, username);
+        setCookieValue(SESSION_USER_KEY, username);
     }
 
     function clearSessionUser() {
-        localStorage.removeItem(SESSION_USER_KEY);
+        safeLocalRemove(SESSION_USER_KEY);
+        deleteCookieValue(SESSION_USER_KEY);
     }
 
     function getSessionUser() {
-        return localStorage.getItem(SESSION_USER_KEY);
+        return safeLocalGet(SESSION_USER_KEY) || getCookieValue(SESSION_USER_KEY);
     }
 
     function togglePassword(fieldId, trigger) {

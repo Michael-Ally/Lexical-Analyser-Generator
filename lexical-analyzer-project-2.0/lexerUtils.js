@@ -1,8 +1,8 @@
 let currentLang = 'c';
 let latestTokens = [];
 
-
-setTimeout(function() {
+// Event listeners
+setTimeout(function () {
     let cBtn = document.querySelector('.lang-preset-btn.c');
     let cppBtn = document.querySelector('.lang-preset-btn.cpp');
     let javaBtn = document.querySelector('.lang-preset-btn.java');
@@ -11,7 +11,7 @@ setTimeout(function() {
     let clearBtn = document.getElementById('clearInput');
 
     if (cBtn) {
-        cBtn.addEventListener('click', function() {
+        cBtn.addEventListener('click', function () {
             currentLang = 'c';
             loadLangPreset('c');
             // refresh banner after preset change
@@ -20,7 +20,7 @@ setTimeout(function() {
     }
 
     if (cppBtn) {
-        cppBtn.addEventListener('click', function() {
+        cppBtn.addEventListener('click', function () {
             currentLang = 'cpp';
             loadLangPreset('cpp');
             updateLangBanner(detectLanguage(document.getElementById('codeArea').value), currentLang);
@@ -28,7 +28,7 @@ setTimeout(function() {
     }
 
     if (javaBtn) {
-        javaBtn.addEventListener('click', function() {
+        javaBtn.addEventListener('click', function () {
             currentLang = 'java';
             loadLangPreset('java');
             updateLangBanner(detectLanguage(document.getElementById('codeArea').value), currentLang);
@@ -36,19 +36,19 @@ setTimeout(function() {
     }
 
     if (tokenizeBtn) {
-        tokenizeBtn.addEventListener('click', function() {
+        tokenizeBtn.addEventListener('click', function () {
             tokenize();
         });
     }
 
     if (reportBtn) {
-        reportBtn.addEventListener('click', function() {
+        reportBtn.addEventListener('click', function () {
             runDiagnostics();
         });
     }
 
     if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
+        clearBtn.addEventListener('click', function () {
             document.getElementById('codeArea').value = '';
             document.getElementById('Regular Expression').value = '';
             let table = document.getElementById('tokenTable');
@@ -68,10 +68,10 @@ setTimeout(function() {
     // Handle input type radio buttons for file upload
     let inputTypeRadios = document.querySelectorAll('input[name="inputType"]');
     let fileInput = document.getElementById('fileInput');
-    
+
     if (inputTypeRadios) {
-        inputTypeRadios.forEach(function(radio) {
-            radio.addEventListener('change', function() {
+        inputTypeRadios.forEach(function (radio) {
+            radio.addEventListener('change', function () {
                 if (this.value === 'file' && fileInput) {
                     fileInput.click();
                 }
@@ -81,11 +81,11 @@ setTimeout(function() {
 
     // Handle file input change
     if (fileInput) {
-        fileInput.addEventListener('change', function(event) {
+        fileInput.addEventListener('change', function (event) {
             let file = event.target.files[0];
             if (file) {
                 let reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     document.getElementById('codeArea').value = e.target.result;
                     // run detection after file load
                     updateLangBanner(detectLanguage(e.target.result), currentLang);
@@ -98,11 +98,11 @@ setTimeout(function() {
     // detect language as user types or pastes
     let codeArea = document.getElementById('codeArea');
     if (codeArea) {
-        codeArea.addEventListener('input', function() {
+        codeArea.addEventListener('input', function () {
             updateLangBanner(detectLanguage(this.value), currentLang);
         });
-        codeArea.addEventListener('paste', function() {
-         
+        codeArea.addEventListener('paste', function () {
+            // small timeout to allow pasted content to populate
             setTimeout(() => updateLangBanner(detectLanguage(this.value), currentLang), 50);
         });
     }
@@ -120,27 +120,27 @@ function detectLanguage(code) {
     };
 
     let results = {};
-    Object.keys(candidates).forEach(function(lang) {
+    Object.keys(candidates).forEach(function (lang) {
         let fn = candidates[lang];
         if (!fn) {
-            results[lang] = {unknown: Infinity, known: 0, total: 0};
+            results[lang] = { unknown: Infinity, known: 0, total: 0 };
             return;
         }
         try {
             let toks = fn(code) || [];
             let total = toks.length;
-            let unknown = toks.filter(function(t) { return String(t.type).toLowerCase() === 'unknown'; }).length;
+            let unknown = toks.filter(function (t) { return String(t.type).toLowerCase() === 'unknown'; }).length;
             let known = total - unknown;
-            results[lang] = {unknown: unknown, known: known, total: total};
+            results[lang] = { unknown: unknown, known: known, total: total };
         } catch (e) {
-            results[lang] = {unknown: Infinity, known: 0, total: 0};
+            results[lang] = { unknown: Infinity, known: 0, total: 0 };
         }
     });
 
-    tokens
+    // choose language with fewest unknowns; require at least some known tokens
     let best = null;
     let bestUnknown = Infinity;
-    Object.keys(results).forEach(function(lang) {
+    Object.keys(results).forEach(function (lang) {
         let r = results[lang];
         if (r.unknown < bestUnknown) {
             bestUnknown = r.unknown;
@@ -180,7 +180,7 @@ function setReportList(listId, items) {
 
     list.innerHTML = '';
 
-    items.forEach(function(item) {
+    items.forEach(function (item) {
         let li = document.createElement('li');
         li.textContent = item;
         list.appendChild(li);
@@ -217,16 +217,11 @@ function runDiagnostics() {
     }
 
     if (tokens.length === 0 && code) {
-        if (currentLang === 'c') {
-            tokens = lexicalAnalyzerC(code);
-        } else if (currentLang === 'cpp') {
-            tokens = lexicalAnalyzerCPP(code);
-        } else if (currentLang === 'java') {
-            tokens = lexicalAnalyzerJava(code);
-        }
+        setReportList('reportSummary', ['Tokenize your code first to generate a report.']);
+        return;
     }
 
-    issues = tokens.filter(function(token) {
+    issues = tokens.filter(function (token) {
         return String(token.type).toLowerCase() === 'unknown';
     });
 
@@ -248,12 +243,14 @@ function runDiagnostics() {
         return;
     }
 
-    setReportList('reportIssues', issues.map(function(issue) {
+    setReportList('reportIssues', issues.map(function (issue) {
         return 'Unknown token "' + issue.value + '" at line ' + issue.line + '.';
     }));
 }
 
 function loadLangPreset(lang) {
+    currentLang = lang;
+
     if (lang === 'c') {
         document.getElementById('Regular Expression').value = `WHITESPACE      = [ \\t\\r\\n]+
 
@@ -332,17 +329,31 @@ DOT             = \\.
 
 ELLIPSIS        = \\.\\.\\.`;
     }
+
+    document.querySelectorAll('.lang-preset-btn').forEach(function (button) {
+        button.classList.remove('active');
+    });
+
+    let activeButton = document.querySelector('.lang-preset-btn.' + lang);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+
+    if (typeof visualizeRegexDFA === 'function') {
+        visualizeRegexDFA();
+    }
+
+    updateLangBanner(detectLanguage(document.getElementById('codeArea').value), currentLang);
 }
 
 function tokenize() {
     let code = document.getElementById('codeArea').value;
     let tokens;
-    if (currentLang === 'c') {
-        tokens = lexicalAnalyzerC(code);
-    } else if (currentLang === 'cpp') {
-        tokens = lexicalAnalyzerCPP(code);
-    } else if (currentLang === 'java') {
-        tokens = lexicalAnalyzerJava(code);
+    if (window.allDFAModels && window.allDFAModels.length > 0) {
+        tokens = TokenizerDFA.tokenizeWithDFA(code, window.allDFAModels);
+    } else {
+        alert('Define token rules first, then tokenize.');
+        return;
     }
     let table = document.getElementById('tokenTable');
 
