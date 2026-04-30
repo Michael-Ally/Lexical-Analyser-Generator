@@ -118,7 +118,7 @@
             .replace(/(\*|\+|\?)\?/g, "$1")
             .trim();
     }
-
+//tokenizeregex finction
     function tokenizeRegex(regex) {
         const tokens = [];
 
